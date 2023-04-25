@@ -108,6 +108,36 @@ def prep_telco(df):
     df = pd.concat([df, dummy_df], axis=1)
     return df
 
+def prep_telco2(df):
+    """
+    This function will
+    - take in the telco_churn dataframe
+    - clean it up (remove useless columns, 
+      remove unneeded columns noted in explore phase (CHANGE FROM prep_telco),
+      rename some columns, and add encoded columns for categorical variables (columns) 
+    - returns cleaned up (prepared) dataframe
+    """
+    drop_cols = ['customer_id', 'internet_service_type_id', 
+                 'contract_type_id', 'payment_type_id',
+                 'multiple_lines', 'phone_service', 
+                 'streaming_tv', 'streaming_movies', 
+                 'total_charges', 'gender', 'senior_citizen',
+                 'partner', 'dependents']
+    df = df.drop(columns=drop_cols)
+#     df.total_charges = df.total_charges.str.replace(' ', '0').astype(float)
+#     df['gender_encoded'] = df.gender.map({'Male': 0, 'Female': 1})
+#     df['partner_encoded'] = df.partner.map({'No': 0, 'Yes': 1})
+#     df['dependendents_encoded'] = df.dependents.map({'No': 0, 'Yes': 1})
+#     df['phone_service_encoded'] = df.phone_service.map({'No': 0, 'Yes': 1})
+    df['paperless_billing_encoded'] = df.paperless_billing.map({'No': 0, 'Yes': 1})
+    df['churn_encoded'] = df.churn.map({'No': 0, 'Yes': 1})
+    dummy_cols = ['internet_service_type', 'online_security', 
+                  'online_backup', 'device_protection', 'tech_support',
+                  'contract_type', 'payment_type']
+    dummy_df = pd.get_dummies(df[dummy_cols], drop_first=True)
+    df = pd.concat([df, dummy_df], axis=1)
+    return df
+
 def prep_telco_for_model(df):
     """
     This function will
@@ -134,6 +164,32 @@ def prep_telco_for_model(df):
     repeated_cols = ['online_security_No internet service', 'online_backup_No internet service',
                     'device_protection_No internet service', 'tech_support_No internet service',
                     'streaming_tv_No internet service', 'streaming_movies_No internet service']
+    e_df = e_df.drop(columns=repeated_cols)
+    
+    return e_df
+
+def prep_telco_for_model2(df):
+    """
+    This function will
+    - take in telco dataframe from prep_telco2 function
+    - remove non-encoded columns
+    - remove unneccessary columns (repeated columns)
+    - return df with only numeric columns ready for modeling
+    """
+    # getting rid of non-numeric columns to start the modeling phase
+    drop_cols = ['internet_service_type', 'online_security',
+                 'online_backup', 'device_protection', 'tech_support',
+                 'contract_type', 'paperless_billing', 'payment_type', 'churn']
+    # make "encoded" df with only the encoded columns for machine learning
+    e_df = df.drop(columns=drop_cols)
+    
+ 
+    # Since internet_service_type_None is repeated in several columns, I can delete them. 
+    # A possibly better way is to encode them differently so the column names make more sense. maybe later
+    repeated_cols = ['online_security_No internet service',
+                     'online_backup_No internet service', 
+                     'device_protection_No internet service',
+                     'tech_support_No internet service']
     e_df = e_df.drop(columns=repeated_cols)
     
     return e_df

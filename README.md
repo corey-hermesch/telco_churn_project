@@ -59,7 +59,7 @@ My initial hypothesis is that monthly charges and tenure (length of time with th
 |streaming_tv|string|Yes, No, or No internet service|
 |streaming_movies|string|Yes, No, or No internet service|
 |contract_type|string|Month-to-Month, One year, Two year|
-|paperliss_billing|string|Yes if they have paperliss billing, No if not|
+|paperless_billing|string|Yes if they have paperless billing, No if not|
 |payment_type|string|Electronic check, Mailed check, Bank transfer (automatic), Credit card (automatic)|
 |monthly_charges|float|This is the customer's monthly bill|
 |total_charges|float|This is the total amount a customer has paid since being with the company|

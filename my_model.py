@@ -2,8 +2,10 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import confusion_matrix, classification_report
 
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+
 # defining function to split train/validate/test into X and y dataframes AND return the baseline accuracy
-# baseline accuracy code needs work. it's hard coded to 0 right now, and it should get the mode
 def get_X_y_baseline(train, validate, test, target):
     """
     This function will
@@ -30,10 +32,9 @@ def get_X_y_baseline(train, validate, test, target):
     return X_train, X_validate, X_test, y_train, y_validate, y_test, baseline_accuracy
 
 # defining a function to get metrics for a set of predictions vs a train series
-# need to study a bit on what ravel does. which thing does it use for what the positive case is? 0 or 1?
-def get_tree_metrics(y_train, y_pred):
+def get_classifier_metrics(y_train, y_pred):
     """
-    This functiion will
+    This function will
     - take in a y_train series and a y_pred (result from a classifier.predict)
     - assumes just two options for confusion matrix, i.e. not 3 or more categories (I think)
     - prints out confusion matrix with row/column labeled with actual/predicted and the unique values in y_train
@@ -78,6 +79,35 @@ def get_tree_metrics(y_train, y_pred):
     print(f"Support (1): {support_neg}")
     
     return TN, FP, FN, TP
+
+def get_multi_logit_scores(X_train, X_validate, y_train, y_validate):
+    """
+    This function will
+    - take in X_train, X_validate, y_train, y_validate
+    - make multiple Logistic Regression models with varying C values
+        - C = [.01, .1, 1, 10, 100, 1000]
+    - return dataframe with train_accuracy, validate_accuracy, and coefficients of each variable
+    """
+    C_values = [.01, .1, 1, 10, 100, 1000]
+    results = []
+    cols = ['C','train_acc','val_acc']
+    coef_cols = ['coef_' + c for c in X_train.columns]
+    results_df = pd.DataFrame(cols + coef_cols).T
+
+    for x in C_values:
+        logit = LogisticRegression(C=x)
+        logit.fit(X_train, y_train)
+        
+        train_acc = logit.score(X_train, y_train)
+        val_acc = logit.score(X_validate, y_validate)
+
+        test = np.array([x, train_acc, val_acc])
+        test_coef = logit.coef_
+        combo_array = np.concatenate((test, test_coef[0]))
+        new_df = pd.DataFrame(combo_array)
+        results_df = pd.concat((results_df, new_df.T), axis=0)
+
+    return results_df  
 
 def get_knn_metrics(X_train, X_validate, y_train, y_validate, weights_='uniform', max_n=20):
     """
