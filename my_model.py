@@ -4,6 +4,8 @@ from sklearn.metrics import confusion_matrix, classification_report
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier 
+from sklearn.tree import DecisionTreeClassifier
 
 # defining function to split train/validate/test into X and y dataframes AND return the baseline accuracy
 def get_X_y_baseline(train, validate, test, target):
@@ -80,6 +82,7 @@ def get_classifier_metrics(y_train, y_pred):
     
     return TN, FP, FN, TP
 
+# defining a function to get accuracy scores of multiple LogisticRegression models
 def get_multi_logit_scores(X_train, X_validate, y_train, y_validate):
     """
     This function will
@@ -109,6 +112,7 @@ def get_multi_logit_scores(X_train, X_validate, y_train, y_validate):
 
     return results_df  
 
+# defining a function to get accuracy scores of multiple knn models
 def get_knn_metrics(X_train, X_validate, y_train, y_validate, weights_='uniform', max_n=20):
     """
     This function will
@@ -128,3 +132,65 @@ def get_knn_metrics(X_train, X_validate, y_train, y_validate, weights_='uniform'
 
     results_df = pd.DataFrame(results, index=(range(1,max_n+1)), columns=['train_acc', 'val_acc'])
     return results_df
+
+# defining a function to get accuracy scores of multiple RandomForest models
+def get_rf_scores(X_train, X_validate, y_train, y_validate):
+    """
+    This function will
+    - take a while to run if you have a large dataset!
+    - take in X_train, X_validate, y_train, y_validate
+    - make multiple RandomForest classifier models with hyperparameters that vary:
+        - max_depth varies from 1 to 10
+        - min_samples_leaf varies from 1 to 10
+    - returns a dataframe with train/validate accuracies and their difference
+    """
+
+    # initialize random forest accuracy dataframe
+    rf_acc_init = pd.Series(range(1,11))
+    rf_acc_df = pd.DataFrame(rf_acc_init, columns=['min_samples_leaf'])
+
+    for y in range(1, 11): # max_depth = 1-10
+        train_acc_list = []
+        val_acc_list = []
+        for x in range(1, 11):  # min_samples_leaf = 1-10
+            rf = RandomForestClassifier(min_samples_leaf=x, random_state=42, max_depth = y, criterion='entropy')
+            rf.fit(X_train, y_train)
+            train_acc = rf.score(X_train, y_train)
+            val_acc = rf.score(X_validate, y_validate)
+            train_acc_list.append(train_acc)
+            val_acc_list.append(val_acc)
+        new_col_t = 'trn_acc_depth_' + str(y)
+        rf_acc_df[new_col_t] = pd.Series(train_acc_list)
+        new_col_v = 'val_acc_depth_' + str(y)
+        rf_acc_df[new_col_v] = pd.Series(val_acc_list)
+        new_col_d = 'diff_' + str(y)
+        rf_acc_df[new_col_d] = rf_acc_df[new_col_t] - rf_acc_df[new_col_v]
+    
+    return rf_acc_df
+
+# defining a function to get accuracy scores of multiple Decision Tree models
+def get_dtree_scores(X_train, X_validate, y_train, y_validate, crit='gini', max_d=10):
+    """
+    This function will
+    - take in X_train, X_validate, y_train, y_validate (dataframes for modeling)
+    - take in crit (criterion) with the default value 'gini'
+        - other valid options are 'entropy' and 'log_loss'
+    - take in max_d (max_depth) with default value of 10
+        - this will set the number of trees to create with each having max_depth 1 to max_d
+    - make 10 DecisionTree classifier models with max_depth from 1 to 10
+    - return train and validate accuracies for each tree in a dataframe
+    """
+    #initialize results
+    results=[]
+
+    for x in range(1, max_d+1):
+        tree = DecisionTreeClassifier(max_depth=x, criterion=crit)
+        tree.fit(X_train, y_train)
+        
+        train_acc = tree.score(X_train, y_train)
+        val_acc = tree.score(X_validate, y_validate)
+        results.append([x, train_acc, val_acc])
+            
+    results_df = pd.DataFrame(results, index=(range(1,max_d+1)), columns=['max_depth','train_acc','val_acc'])
+    results_df['difference'] = results_df.train_acc - results_df.val_acc
+    return results_df  
