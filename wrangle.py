@@ -108,62 +108,34 @@ def prep_telco_to_explore(df):
     df = pd.concat([df, dummy_df], axis=1)
     return df
 
-def prep_telco(df):
-    """
-    This function will
-    - take in the telco_churn dataframe
-    - clean it up (remove useless columns, 
-      remove unneeded columns noted in explore phase (CHANGE FROM prep_telco_to_explore,
-      rename some columns, and add encoded columns for categorical variables (columns) 
-    - returns cleaned up (prepared) dataframe
-    """
-    drop_cols = ['customer_id', 'internet_service_type_id', 
-                 'contract_type_id', 'payment_type_id',
-                 'multiple_lines', 'phone_service', 
-                 'streaming_tv', 'streaming_movies', 
-                 'total_charges', 'gender', 'senior_citizen',
-                 'partner', 'dependents']
-    df = df.drop(columns=drop_cols)
+# def prep_telco(df):
+#     """
+#     This function will
+#     - take in the telco_churn dataframe
+#     - clean it up (remove useless columns, 
+#       remove unneeded columns noted in explore phase (CHANGE FROM prep_telco_to_explore,
+#       rename some columns, and add encoded columns for categorical variables (columns) 
+#     - returns cleaned up (prepared) dataframe
+#     """
+#     drop_cols = ['customer_id', 'internet_service_type_id', 
+#                  'contract_type_id', 'payment_type_id',
+#                  'multiple_lines', 'phone_service', 
+#                  'streaming_tv', 'streaming_movies', 
+#                  'total_charges', 'gender', 'senior_citizen',
+#                  'partner', 'dependents']
+#     df = df.drop(columns=drop_cols)
 
-    df['paperless_billing_encoded'] = df.paperless_billing.map({'No': 0, 'Yes': 1})
-    df['churn_encoded'] = df.churn.map({'No': 0, 'Yes': 1})
+#     df['paperless_billing_encoded'] = df.paperless_billing.map({'No': 0, 'Yes': 1})
+#     df['churn_encoded'] = df.churn.map({'No': 0, 'Yes': 1})
 
-    dummy_cols = ['internet_service_type', 'online_security', 
-                  'online_backup', 'device_protection', 'tech_support',
-                  'contract_type', 'payment_type']
-    dummy_df = pd.get_dummies(df[dummy_cols], drop_first=True)
-    df = pd.concat([df, dummy_df], axis=1)
+#     dummy_cols = ['internet_service_type', 'online_security', 
+#                   'online_backup', 'device_protection', 'tech_support',
+#                   'contract_type', 'payment_type']
+#     dummy_df = pd.get_dummies(df[dummy_cols], drop_first=True)
+#     df = pd.concat([df, dummy_df], axis=1)
 
-    return df
+#     return df
 
-def prep_telco_for_model(df):
-    """
-    This function will
-    - take in telco dataframe from prep_telco function
-    - remove non-encoded columns
-    - remove unneccessary columns (repeated columns)
-    - return df with only numeric columns ready for modeling
-    """
-    # drop unused columns and create dummy columns
-    df = prep_telco(df)
-    
-    # getting rid of non-numeric columns to start the modeling phase
-    drop_cols = ['internet_service_type', 'online_security',
-                 'online_backup', 'device_protection', 'tech_support',
-                 'contract_type', 'paperless_billing', 'payment_type', 'churn']
-    # make "encoded" df with only the encoded columns for machine learning
-    e_df = df.drop(columns=drop_cols)
-    
- 
-    # Since internet_service_type_None is repeated in several columns, I can delete them. 
-    # A possibly better way is to encode them differently so the column names make more sense. maybe later
-    repeated_cols = ['online_security_No internet service',
-                     'online_backup_No internet service', 
-                     'device_protection_No internet service',
-                     'tech_support_No internet service']
-    e_df = e_df.drop(columns=repeated_cols)
-    
-    return e_df
 
 def split_function(df, target_var):
     """
@@ -182,24 +154,5 @@ def split_function(df, target_var):
     print(f'Train: {train.shape}')
     print(f'Validate: {validate.shape}')
     print(f'Test: {test.shape}')
-    
-    return train, validate, test
-
-def impute_feature(train, validate, test, feature='age', strat='median'):
-    """
-    This function will
-    - take in train, validate, test dfs
-    - take in a string which is the column name that has nan values
-        -- default is 'age' (built off titanic df)
-    - take in a string which is the strategy to impute values
-        -- default is 'median'
-    - impute nan values in the feature(age) column and fill with new values
-    - return train, validate, test with imputed values
-    """
-    imputer = SimpleImputer(missing_values=np.nan, strategy=strat)
-    imputer = imputer.fit(train[[feature]])
-    train[[feature]] = imputer.transform(train[[feature]])
-    validate[[feature]] = imputer.transform(validate[[feature]])
-    test[[feature]] = imputer.transform(test[[feature]])
     
     return train, validate, test

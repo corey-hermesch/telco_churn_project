@@ -67,15 +67,36 @@ My initial hypothesis is that monthly charges and tenure (length of time with th
 
  
 # Steps to Reproduce
-1) Clone this repo.
-2) Acquire the data from (for example: [Kaggle](https://www.kaggle.com/datasnaek/chess) )
-3) Put the data in the file containing the cloned repo.
-4) Run notebook.
+1) Clone this repo
+2) Acquire the data from Codeup SQL server via code in this repo 
+2a) OR acquire from [Kaggle](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) and put the data into telco.csv in your working directory (cloned repo)
+4) Run notebook
  
 # Takeaways and Conclusions
-* Takeaway 1
-* Takeaway 2...
+* customers choose to churn ~26.5% of the time in the dataset
+* customers with higher monthly charges churn more often
+    * monthly_charges >=30   => 31% churn rate
+    * monthly_charges 70 - 110  => 36% churn ratee
+    * in contrast, when monthly_charges < 30   => 10% churn rate
+* customers with lower tenure churn more often
+    * when tenure is <= 10/15/20 months, 50/46/44 % of people churned
+    * in contrast, when tenure is > 20 months, only 14% of people churned
+* other drivers of increased churn rate:
+    * contract_type = Month-to-month
+    * payment_type = Electronic check
+    * internet_service_type = Fiber optic
+    * online_security/online_backup/device_protection/tech_support = No
+
+* The final model outperformed the baseline by a small margin (78% vs 73.5%) 
+* However, the recall was only 48% on unseen data which means this model would miss 52% of customers who churn
+* A very simple model that targeted customers with monthly_charges >= 30 would only be ~45% accurate, but it would capture ~91% of customers who are about to churn
+* Another very simple model that targeted customers whose tenure is <= 20 would be ~69% accurate and capture ~69% of customers about to churn
  
 # Recommendations
-* Rec 1
-* Rec 2 ...
+* Considering a variety of customer engagement strategies:
+    * when the cost of engagement is low, utilize a simple model (monthly_charges >= 30 or tenure <= 20) to reach the max percentage of customers about to churn
+    * when the cost of engagement is higher, consider the Decision Tree model since it's accuracy is higher, i.e. less likely to engage with customers who already do not plan to churn
+* Consider collecting additional data to model. For example:
+    * region and/or zip code,
+    * number of customer service interactions (phone calls, service appointments), 
+    * number of close contacts with Telco 

@@ -26,7 +26,7 @@ def cat_hist_plot(df, cols, target):
 
 def get_telco_ne_df(df_telco):
     # ne is short for no_encoding. removing the encoded columns will just make it a little easier to look at
-    cols = np.array(df_telco.columns[0:20])
+    cols = np.array(df_telco.columns[0:21])
     return df_telco[cols]
 
 def get_hist_churn(df, target='churn'):
