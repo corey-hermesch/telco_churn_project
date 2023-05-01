@@ -63,10 +63,16 @@ def get_hist_plot(df, target='churn', feature='monthly_charges'):
     """
     # print histplot
     s = list(df[target].value_counts().sort_values().index)
-    sns.histplot(df[df[target] == s[1]][feature], color='blue')
-    sns.histplot(df[df[target] == s[0]][feature], color='red')
+    blue_label = f'no {target}'
+    red_label = target
+    sns.histplot(df[df[target] == s[1]][feature], color='blue', label=blue_label)
+    sns.histplot(df[df[target] == s[0]][feature], color='red', label=red_label)
 
     plt.title(f'histplot of {feature}:  red = {target}, blue = no {target}')
+    plt.legend()
+    
+    if feature == 'payment_type':
+        plt.xticks(rotation=20)
     plt.show()
     
 def get_mannwhitneyu(df, target='churn', feature='monthly_charges'):
