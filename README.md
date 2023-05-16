@@ -1,4 +1,4 @@
-# Title
+# Telco Churn Project
  
 # Project Description
  
@@ -69,7 +69,7 @@ My initial hypothesis is that monthly charges and tenure (length of time with th
 # Steps to Reproduce
 1) Clone this repo
 2) Acquire the data from Codeup SQL server via code in this repo OR acquire from [Kaggle](https://www.kaggle.com/datasets/blastchar/telco-customer-churn) and put the data into telco.csv in your working directory (cloned repo)
-4) Run notebook
+3) Run notebook
  
 # Takeaways and Conclusions
 * customers in the dataset churn ~26.5% of the time
